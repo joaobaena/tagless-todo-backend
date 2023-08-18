@@ -4,6 +4,9 @@ ThisBuild / scalaVersion := "3.3.0"
 
 val catsVersion = "3.5.0"
 val http4sVersion = "0.23.22"
+val chimneyVersion = "0.8.0-M1"
+val circeVersion = "0.14.5"
+
 
 lazy val root = (project in file("."))
   .settings(
@@ -14,6 +17,9 @@ lazy val root = (project in file("."))
       "org.typelevel" %% "cats-effect-std" % catsVersion,
       "org.http4s" %% "http4s-ember-server" % http4sVersion,
       "org.http4s" %% "http4s-dsl" % http4sVersion,
-      "org.http4s" %% "http4s-circe" % http4sVersion
+      "org.http4s" %% "http4s-circe" % http4sVersion,
+      "io.circe" %% "circe-core" % circeVersion,
+      "io.circe" %% "circe-generic" % circeVersion,
+      "io.scalaland" %% "chimney" % chimneyVersion
     )
   )

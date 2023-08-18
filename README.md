@@ -8,7 +8,6 @@ Backend is implemented with Scala using http4s, Circe, and abstracting the effec
 
 ### TODO
 
-* Create algebras for repository and service layer
 * Create tests for repository and service layer
 * Create implementations for repository and service layer
 * Add http4s and routes

@@ -1,5 +1,8 @@
 package paulo.baena.todo.persistence
 
+import io.scalaland.chimney.dsl.*
+import paulo.baena.todo.api.Messages.TodoItemResponse
+
 import java.time.OffsetDateTime
 
 object Representations {
@@ -10,10 +13,12 @@ object Representations {
     completed: Boolean,
     updatedAt: OffsetDateTime,
     createdAt: OffsetDateTime
-  )
+  ) {
+    lazy val asTodoItemResponse = this.transformInto[TodoItemResponse]
+  }
 
-  final case class CreateTodo(title: String, order: Int)
+  final case class CreateTodoCommand(title: String, order: Int)
 
-  final case class UpdateTodo(title: Option[String], order: Int, completed: Option[Boolean])
+  final case class UpdateTodoCommand(title: Option[String], order: Option[Int], completed: Option[Boolean])
 
 }
