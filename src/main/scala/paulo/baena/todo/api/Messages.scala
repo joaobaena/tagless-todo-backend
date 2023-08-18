@@ -27,6 +27,4 @@ object Messages {
   object TodoItemResponse {
     implicit val encoder: Encoder[TodoItemResponse] = deriveEncoder
   }
-
-  final case class AllTodoItems()
 }

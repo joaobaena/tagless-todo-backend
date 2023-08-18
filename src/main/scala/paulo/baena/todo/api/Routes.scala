@@ -17,45 +17,46 @@ trait Routes[F[_]: Async] {
 
   implicit def circeJsonEncoder[A: Encoder]: EntityEncoder[F, A] = jsonEncoderOf[F, A]
 
-
   def httpRoutes(todoRepository: TodoRepository[F]): HttpRoutes[F] = HttpRoutes.of[F] {
     case GET -> Root =>
       for {
-        todoItems <- todoRepository.getAll
+        todoItems        <- todoRepository.getAll
         todoItemsResponse = todoItems.map(_.asTodoItemResponse)
-        response <- Ok(todoItemsResponse)
+        response         <- Ok(todoItemsResponse)
       } yield response
 
     case GET -> Root / LongVar(todoId) =>
       for {
         maybeTodoItem <- todoRepository.getTodoById(todoId)
-        response <- maybeTodoItem.fold(NotFound(s"Id $todoId not found"))(todoItem => Ok(todoItem.asTodoItemResponse))
+        response      <- maybeTodoItem.fold(NotFound(s"Id $todoId not found"))(todoItem => Ok(todoItem.asTodoItemResponse))
       } yield response
 
-    case request @ POST -> Root => request.decode[CreateTodoRequest] { createTodoRequest =>
-      for {
-        createdTodoItem <- todoRepository.createTodo(createTodoRequest.asCreateTodoCommand)
-        response <- Created(createdTodoItem.asTodoItemResponse)
-      } yield response
-    }
+    case request @ POST -> Root =>
+      request.decode[CreateTodoRequest] { createTodoRequest =>
+        for {
+          createdTodoItem <- todoRepository.createTodo(createTodoRequest.asCreateTodoCommand)
+          response        <- Created(createdTodoItem.asTodoItemResponse)
+        } yield response
+      }
 
-    case request @ PATCH -> Root / LongVar(todoId) => request.decode[UpdateTodoRequest] { updateTodoRequest =>
-      for {
-        maybeTodoItem <- todoRepository.updateTodo(todoId, updateTodoRequest.asUpdateTodoCommand)
-        response <- maybeTodoItem.fold(NotFound(s"Id $todoId not found"))(todoItem => Ok(todoItem.asTodoItemResponse))
-      } yield response
-    }
+    case request @ PATCH -> Root / LongVar(todoId) =>
+      request.decode[UpdateTodoRequest] { updateTodoRequest =>
+        for {
+          maybeTodoItem <- todoRepository.updateTodo(todoId, updateTodoRequest.asUpdateTodoCommand)
+          response      <- maybeTodoItem.fold(NotFound(s"Id $todoId not found"))(todoItem => Ok(todoItem.asTodoItemResponse))
+        } yield response
+      }
 
     case DELETE -> Root =>
       for {
-        _ <- todoRepository.deleteAll
+        _        <- todoRepository.deleteAll
         response <- Ok("Deleted")
       } yield response
 
     case DELETE -> Root / LongVar(todoId) =>
       for {
         maybeDeleted <- todoRepository.deleteTodoById(todoId)
-        response <- maybeDeleted.fold(NotFound(s"Id $todoId not found"))(_ => Ok("Deleted"))
+        response     <- maybeDeleted.fold(NotFound(s"Id $todoId not found"))(_ => Ok("Deleted"))
       } yield response
   }
 }
