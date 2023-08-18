@@ -8,7 +8,9 @@ Backend is implemented with Scala using http4s, Circe, and abstracting the effec
 
 ### TODO
 
-* Create tests for repository and service layer
-* Create implementations for repository and service layer
-* Add http4s and routes
-* Add tests for http
+* Add config
+* Create tests for service layer
+* Create in memory repository
+* Create tests for the in memory repository
+* Wrap everything and start on main using IO in the end of the world
+* Deploy with Heroku
