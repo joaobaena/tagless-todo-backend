@@ -12,7 +12,7 @@ import paulo.baena.todo.persistence.TodoRepository
 trait Routes[F[_]: Async] {
   private val dsl: Http4sDsl[F] = Http4sDsl[F]
   import dsl._
-  
+
   object CirceCodec {
     implicit def circeJsonDecoder[A: Decoder]: EntityDecoder[F, A] = jsonOf[F, A]
 
@@ -67,4 +67,9 @@ trait Routes[F[_]: Async] {
         } yield response
     }
   }
+}
+
+object Routes {
+  def live[F[_]: Async](todoRepository: TodoRepository[F]): HttpRoutes[F] =
+    new Routes[F] {}.httpRoutes(todoRepository)
 }

@@ -8,9 +8,9 @@ import paulo.baena.todo.persistence.Representations.*
 import java.time.{Instant, OffsetDateTime, ZoneOffset}
 
 final case class TestTodoRepository[F[_]: Async](
+  clock: Clock[F],
   ref: Ref[F, Map[Long, TodoItem]],
-  idCounter: Ref[F, Long],
-  clock: Clock[F]
+  idCounter: Ref[F, Long]
 ) extends TodoRepository[F] {
 
   def createTodo(createTodo: CreateTodoCommand): F[TodoItem] =
@@ -35,7 +35,7 @@ final case class TestTodoRepository[F[_]: Async](
     } yield maybeUpdatedTodo
 
   private def applyUpdateTodo(updateTodo: UpdateTodoCommand, originalTodo: TodoItem): F[TodoItem] =
-    getOffsetDateTime.map( now =>
+    getOffsetDateTime.map(now =>
       originalTodo
         .copy(
           title = updateTodo.title.getOrElse(originalTodo.title),
@@ -62,9 +62,6 @@ final case class TestTodoRepository[F[_]: Async](
 }
 
 object TestTodoRepository {
-  def inMemory[F[_] : Async](clock: Clock[F]): F[TestTodoRepository[F]] =
-    for {
-      ref <- Ref.of[F, Map[Long, TodoItem]](Map.empty)
-      idCounter <- Ref.of[F, Long](1L)
-    } yield TestTodoRepository(ref, idCounter, clock)
+  def inMemory[F[_]: Async]: TestTodoRepository[F] =
+    TestTodoRepository(Clock[F], Ref.unsafe[F, Map[Long, TodoItem]](Map.empty), Ref.unsafe[F, Long](1L))
 }
