@@ -2,11 +2,12 @@ ThisBuild / version := "0.1.0-SNAPSHOT"
 
 ThisBuild / scalaVersion := "3.3.0"
 
-val catsVersion       = "3.5.0"
-val chimneyVersion    = "0.8.0-M1"
-val circeVersion      = "0.14.5"
+val catsVersion        = "3.5.0"
+val chimneyVersion     = "0.8.0-M1"
+val circeVersion       = "0.14.5"
 val circeConfigVersion = "0.10.0"
-val http4sVersion     = "0.23.22"
+val http4sVersion      = "0.23.22"
+val munitVersion       = "1.0.7"
 
 lazy val root = (project in file("."))
   .settings(
@@ -21,6 +22,7 @@ lazy val root = (project in file("."))
       "io.circe"      %% "circe-config"        % circeConfigVersion,
       "io.circe"      %% "circe-core"          % circeVersion,
       "io.circe"      %% "circe-generic"       % circeVersion,
-      "io.scalaland"  %% "chimney"             % chimneyVersion
+      "io.scalaland"  %% "chimney"             % chimneyVersion,
+      "org.typelevel" %% "munit-cats-effect-3" % munitVersion % Test
     )
   )

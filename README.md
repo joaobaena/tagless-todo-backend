@@ -9,8 +9,6 @@ Backend is implemented with Scala using http4s, Circe, and abstracting the effec
 ### TODO
 
 * Create tests for service layer
-* Create in memory repository
-* Create migration with flyway
-* Create tests for the in memory repository
+* Create in memory repository and migration with flyway
 * Wrap everything and start on main using IO in the end of the world
 * Deploy with Heroku
