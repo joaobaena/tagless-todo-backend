@@ -14,6 +14,7 @@ object ApiTestPrimitives {
 
   val nonExistingId: Long = Long.MaxValue
 
+  // TODO: is it possible to pass IO[HttpRoutes[IO] and interpret it on the test suite?
   val routes: HttpRoutes[IO] =
     TestTodoRepository.inMemory[IO].map(Routes.live(_)).unsafeRunSync()
 
