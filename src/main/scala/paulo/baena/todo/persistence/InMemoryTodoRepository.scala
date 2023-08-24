@@ -2,6 +2,7 @@ package paulo.baena.todo.persistence
 
 import cats.effect.Async
 import doobie.Transactor
+import paulo.baena.todo.config.DatabaseConfig
 import paulo.baena.todo.persistence.Representations.TodoItem
 
 final case class InMemoryTodoRepository[F[_]: Async](transactor: Transactor[F]) extends TodoRepository[F] {
