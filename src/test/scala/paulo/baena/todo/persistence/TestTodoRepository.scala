@@ -62,6 +62,9 @@ final case class TestTodoRepository[F[_]: Async](
 }
 
 object TestTodoRepository {
-  def inMemory[F[_]: Async]: TestTodoRepository[F] =
-    TestTodoRepository(Clock[F], Ref.unsafe[F, Map[Long, TodoItem]](Map.empty), Ref.unsafe[F, Long](1L))
+  def inMemory[F[_]: Async]: F[TestTodoRepository[F]] =
+    for {
+      ref <- Ref.of[F, Map[Long, TodoItem]](Map.empty)
+      idCounter <- Ref.of[F, Long](1L)
+    } yield TestTodoRepository(Clock[F], ref, idCounter)
 }
