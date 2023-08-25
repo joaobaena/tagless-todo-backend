@@ -15,6 +15,7 @@ val munitVersion       = "1.0.7"
 val slfjVersion        = "1.7.32"
 
 lazy val root = (project in file("."))
+  .enablePlugins(JavaAppPackaging)
   .settings(
     name := "tagless-todo-backend",
     scalacOptions ++= Seq(
