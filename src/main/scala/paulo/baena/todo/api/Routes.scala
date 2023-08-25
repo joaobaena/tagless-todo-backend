@@ -24,28 +24,31 @@ trait Routes[F[_]: Async] {
     import CirceCodec._
 
     HttpRoutes.of[F] {
-      case GET -> Root =>
+      case GET -> Root / "todos" =>
         for {
+          _                <- Async[F].pure(println(s"test"))
           todoItems        <- todoRepository.getAll
+          _                <- Async[F].pure(println(s"todoItems: $todoItems"))
           todoItemsResponse = todoItems.map(_.asTodoItemResponse)
           response         <- Ok(todoItemsResponse)
         } yield response
 
-      case GET -> Root / LongVar(todoId) =>
+      case GET -> Root / "todos" / LongVar(todoId) =>
         for {
           maybeTodoItem <- todoRepository.getTodoById(todoId)
           response      <- maybeTodoItem.fold(NotFound(s"Id $todoId not found"))(todoItem => Ok(todoItem.asTodoItemResponse))
         } yield response
 
-      case request @ POST -> Root =>
+      case request @ POST -> Root / "todos" =>
         request.decode[CreateTodoRequest] { createTodoRequest =>
           for {
             createdTodoItem <- todoRepository.createTodo(createTodoRequest.asCreateTodoCommand)
+            _                = println(s"createdTodoItem: $createdTodoItem")
             response        <- Created(createdTodoItem.asTodoItemResponse)
           } yield response
         }
 
-      case request @ PATCH -> Root / LongVar(todoId) =>
+      case request @ PATCH -> Root / "todos" / LongVar(todoId) =>
         request.decode[UpdateTodoRequest] { updateTodoRequest =>
           for {
             maybeTodoItem <- todoRepository.updateTodo(todoId, updateTodoRequest.asUpdateTodoCommand)
@@ -54,13 +57,13 @@ trait Routes[F[_]: Async] {
           } yield response
         }
 
-      case DELETE -> Root =>
+      case DELETE -> Root / "todos" =>
         for {
           _        <- todoRepository.deleteAll
           response <- Ok("Deleted")
         } yield response
 
-      case DELETE -> Root / LongVar(todoId) =>
+      case DELETE -> Root / "todos" / LongVar(todoId) =>
         for {
           maybeDeleted <- todoRepository.deleteTodoById(todoId)
           response     <- maybeDeleted.fold(NotFound(s"Id $todoId not found"))(_ => Ok("Deleted"))

@@ -10,6 +10,7 @@ val doobieVersion      = "1.0.0-RC4"
 val flywayVersion      = "9.19.1"
 val http4sVersion      = "0.23.22"
 val h2Version          = "2.1.214"
+val logCatsVersion     = "2.6.0"
 val munitVersion       = "1.0.7"
 
 lazy val root = (project in file("."))
@@ -20,6 +21,7 @@ lazy val root = (project in file("."))
       "org.typelevel" %% "cats-effect"         % catsVersion,
       "org.typelevel" %% "cats-effect-kernel"  % catsVersion,
       "org.typelevel" %% "cats-effect-std"     % catsVersion,
+      "org.typelevel" %% "log4cats-slf4j"      % logCatsVersion,
       "org.flywaydb"   % "flyway-core"         % flywayVersion,
       "org.http4s"    %% "http4s-ember-server" % http4sVersion,
       "org.http4s"    %% "http4s-dsl"          % http4sVersion,
