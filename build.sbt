@@ -12,10 +12,17 @@ val http4sVersion      = "0.23.22"
 val h2Version          = "2.1.214"
 val logCatsVersion     = "2.6.0"
 val munitVersion       = "1.0.7"
+val slfjVersion        = "1.7.32"
 
 lazy val root = (project in file("."))
   .settings(
     name := "tagless-todo-backend",
+    scalacOptions ++= Seq(
+      "-deprecation",
+      "-feature",
+      "-unchecked",
+      "-Wunused:imports" // Emit warning for unused imports.
+    ),
     libraryDependencies ++= Seq(
       "com.h2database" % "h2"                  % h2Version,
       "org.typelevel" %% "cats-effect"         % catsVersion,
@@ -30,9 +37,17 @@ lazy val root = (project in file("."))
       "io.circe"      %% "circe-core"          % circeVersion,
       "io.circe"      %% "circe-generic"       % circeVersion,
       "io.scalaland"  %% "chimney"             % chimneyVersion,
+      "org.slf4j"      % "slf4j-log4j12"       % slfjVersion,
       "org.tpolecat"  %% "doobie-core"         % doobieVersion,
       "org.tpolecat"  %% "doobie-h2"           % doobieVersion,
       "org.tpolecat"  %% "doobie-hikari"       % doobieVersion,
       "org.typelevel" %% "munit-cats-effect-3" % munitVersion % Test
     )
   )
+
+inThisBuild(
+  List(
+    scalaVersion      := "3.3.0",
+    semanticdbEnabled := true,
+  )
+)

@@ -3,7 +3,6 @@ package paulo.baena.todo.persistence
 import cats.effect._
 import cats.implicits.*
 import doobie.*
-import doobie.hikari.HikariTransactor
 import doobie.implicits.*
 import paulo.baena.todo.persistence.Representations.*
 
@@ -30,18 +29,13 @@ final case class InMemoryTodoRepository[F[_]](transactor: Transactor[F])(implici
       .transact(transactor)
 
   def getAll: F[List[TodoItem]] =
-    for {
-      _   <- Sync[F].delay(println(s"starting query with transactor: ${transactor}"))
-      res <- sql"""
+    sql"""
          SELECT id, title, item_order, completed, updated_at, created_at
          FROM todos
          """
-               .query[TodoItem]
-               .to[List]
-               .transact(transactor)
-      _   <- Sync[F].delay(println(s"finished"))
-
-    } yield res
+      .query[TodoItem]
+      .to[List]
+      .transact(transactor)
 
   def deleteTodoById(todoId: Long): F[Option[Unit]] =
     sql"""
@@ -70,11 +64,4 @@ final case class InMemoryTodoRepository[F[_]](transactor: Transactor[F])(implici
       .query[TodoItem]
       .option
       .transact(transactor)
-}
-
-object InMemoryTodoRepository {
-  def live[F[_]: Sync](transactor: Resource[F, HikariTransactor[F]]): Resource[F, InMemoryTodoRepository[F]] =
-    for {
-      xa <- transactor
-    } yield InMemoryTodoRepository[F](xa)
 }
