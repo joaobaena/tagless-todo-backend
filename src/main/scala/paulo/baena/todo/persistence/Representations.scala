@@ -11,12 +11,15 @@ object Representations {
   final case class TodoItem(
     id: Long,
     title: String,
-    order: Int,
+    itemOrder: Int,
     completed: Boolean,
     updatedAt: OffsetDateTime,
     createdAt: OffsetDateTime
   ) {
-    lazy val asTodoItemResponse = this.transformInto[TodoItemResponse]
+    lazy val asTodoItemResponse = this
+      .into[TodoItemResponse]
+      .withFieldRenamed(_.itemOrder, _.order)
+      .transform
   }
 
   // TODO: doobie type classes should live here or on the repo?

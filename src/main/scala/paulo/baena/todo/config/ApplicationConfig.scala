@@ -2,7 +2,6 @@ package paulo.baena.todo.config
 
 import cats.effect._
 import io.circe.config.parser
-import io.circe.config.syntax._
 import io.circe.generic.auto._
 
 trait ApplicationConfig[F[_]] {
@@ -16,4 +15,6 @@ object ApplicationConfig {
 
     def loadDatabaseConfig: F[DatabaseConfig] = parser.decodePathF[F, DatabaseConfig]("database")
   }
+
+  def configLoader[F[_]: Sync] = new ApplicationConfigLoader[F]
 }

@@ -39,7 +39,7 @@ final case class TestTodoRepository[F[_]: Async](
       originalTodo
         .copy(
           title = updateTodo.title.getOrElse(originalTodo.title),
-          order = updateTodo.order.getOrElse(originalTodo.order),
+          itemOrder = updateTodo.order.getOrElse(originalTodo.itemOrder),
           completed = updateTodo.completed.getOrElse(originalTodo.completed),
           updatedAt = now
         )

@@ -1,7 +1,7 @@
 package paulo.baena.todo.api
 
-import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.*
+import io.circe.{Decoder, Encoder}
 import io.scalaland.chimney.dsl.*
 import paulo.baena.todo.persistence.Representations.{CreateTodoCommand, UpdateTodoCommand}
 
