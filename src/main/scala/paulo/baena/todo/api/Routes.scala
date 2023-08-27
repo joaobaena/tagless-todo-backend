@@ -16,7 +16,7 @@ trait Routes[F[_]: Async] {
   object CirceCodec {
     implicit def circeJsonDecoder[A: Decoder]: EntityDecoder[F, A] = jsonOf[F, A]
 
-    implicit def circeJsonEncoder[A: Encoder]: EntityEncoder[F, A] = jsonEncoderOf[F, A]
+    implicit def circeJsonEncoder[A: Encoder]: EntityEncoder[F, A] = jsonEncoderOf[A]
 
   }
 
@@ -40,22 +40,19 @@ trait Routes[F[_]: Async] {
         } yield response
 
       case request @ POST -> Root / "todos" =>
-        request.decode[CreateTodoRequest] { createTodoRequest =>
-          for {
-            createdTodoItem <- todoRepository.createTodo(createTodoRequest.asCreateTodoCommand)
-            _                = println(s"createdTodoItem: $createdTodoItem")
-            response        <- Created(createdTodoItem.asTodoItemResponse)
-          } yield response
-        }
+        for {
+          createTodoRequest <- request.as[CreateTodoRequest]
+          createdTodoItem    <- todoRepository.createTodo(createTodoRequest.asCreateTodoCommand)
+          response           <- Created(createdTodoItem.asTodoItemResponse)
+        } yield response
 
       case request @ PATCH -> Root / "todos" / LongVar(todoId) =>
-        request.decode[UpdateTodoRequest] { updateTodoRequest =>
-          for {
-            maybeTodoItem <- todoRepository.updateTodo(todoId, updateTodoRequest.asUpdateTodoCommand)
-            response      <-
-              maybeTodoItem.fold(NotFound(s"Id $todoId not found"))(todoItem => Ok(todoItem.asTodoItemResponse))
-          } yield response
-        }
+        for {
+          updateTodoRequest <- request.as[UpdateTodoRequest]
+          maybeTodoItem     <- todoRepository.updateTodo(todoId, updateTodoRequest.asUpdateTodoCommand)
+          response          <-
+            maybeTodoItem.fold(NotFound(s"Id $todoId not found"))(todoItem => Ok(todoItem.asTodoItemResponse))
+        } yield response
 
       case DELETE -> Root / "todos" =>
         for {

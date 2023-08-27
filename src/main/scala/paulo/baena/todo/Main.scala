@@ -3,15 +3,18 @@ package paulo.baena.todo
 import cats.effect.*
 import com.comcast.ip4s.*
 import org.http4s.ember.server.*
-//import org.http4s.server.middleware.{CORS, CORSConfig}
+import org.http4s.server.middleware.CORS
 import paulo.baena.todo.api.Routes
 import paulo.baena.todo.config.ApplicationConfig
 import paulo.baena.todo.persistence.*
+import org.typelevel.log4cats.LoggerFactory
+import org.typelevel.log4cats.slf4j.Slf4jFactory
 
 object Main extends IOApp {
   def run(args: List[String]): IO[ExitCode] = {
-    val configLoader   = ApplicationConfig.configLoader[IO]
-    val serverResource =
+    implicit val loggerFactory: LoggerFactory[IO] = Slf4jFactory.create[IO]
+    val configLoader                              = ApplicationConfig.configLoader[IO]
+    val serverResource                            =
       for {
         databaseConfig   <- Resource.eval(configLoader.loadDatabaseConfig)
         httpServerConfig <- Resource.eval(configLoader.loadHttpServerConfig)
@@ -19,16 +22,15 @@ object Main extends IOApp {
         _                <- Resource.eval(database.startDatabaseAndMigrations)
         transactor       <- database.transactor
         repository        = InMemoryTodoRepository[IO](transactor)
-        httpApp           = Routes.live(repository).orNotFound
-//        config            = CORSConfig.default
-//                              .withAnyOrigin(false)
-//                              .withAllowedOrigins(Set("http://www.todobackend.com"))
+        config           <- Resource.eval(
+                              CORS.policy
+                                .withAllowOriginAll(Routes.live(repository).orNotFound)
+                            )
         server           <- EmberServerBuilder
                               .default[IO]
                               .withHost(Host.fromString(httpServerConfig.url).get)
                               .withPort(Port.fromInt(httpServerConfig.port).get)
-                              .withHttpApp(httpApp)
-//                              .withHttpApp(CORS(httpApp, config))
+                              .withHttpApp(config)
                               .build
       } yield server
     serverResource
