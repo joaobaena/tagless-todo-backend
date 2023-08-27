@@ -1,11 +1,9 @@
 package paulo.baena.todo.persistence
 
 import cats.effect.*
-import cats.implicits.*
 import com.zaxxer.hikari.HikariConfig
 import doobie.*
 import doobie.hikari.HikariTransactor
-import doobie.implicits.toSqlInterpolator
 import org.flywaydb.core.Flyway
 import paulo.baena.todo.config.DatabaseConfig
 
@@ -40,14 +38,4 @@ object Database {
     }
   }
 
-}
-
-object DatabaseHealthCheck {
-  def healthCheck[F[_]: Sync](transactor: Transactor[F]): F[Boolean] = {
-    val query = sql"SELECT 1".query[Int].unique
-    transactor.trans.apply(query).attempt.map {
-      case Right(_) => true
-      case Left(_)  => false
-    }
-  }
 }
