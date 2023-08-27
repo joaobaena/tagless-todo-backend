@@ -2,8 +2,9 @@ package paulo.baena.todo.persistence
 
 import cats.effect.*
 import cats.implicits.*
+import com.softwaremill.quicklens._
+import doobie.*
 import doobie.implicits.*
-import doobie.{ConnectionIO, _}
 import paulo.baena.todo.persistence.Representations.*
 
 final case class H2TodoRepository[F[_]](transactor: Transactor[F])(implicit F: Sync[F]) extends TodoRepository[F] {
@@ -46,12 +47,18 @@ final case class H2TodoRepository[F[_]](transactor: Transactor[F])(implicit F: S
       .getTodoById(todoId)
       .option
       .flatMap {
-        case Some(_) =>
+        case Some(todo) =>
+          val updateWith =
+            updateTodo
+              .modify(_.completed)
+              .using(_.fold(todo.completed.some)(_.some))
+              .modify(_.title)
+              .using(_.fold(todo.title.some)(_.some))
           Queries
-            .updateTodo(todoId, updateTodo)
+            .updateTodo(todoId, updateWith)
             .withUniqueGeneratedKeys[TodoItem]("id", "title", "item_order", "completed", "updated_at", "created_at")
             .map(Some(_))
-        case None    =>
+        case None       =>
           none.pure[ConnectionIO]
       }
       .transact(transactor)

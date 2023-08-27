@@ -3,7 +3,6 @@ package paulo.baena.todo.persistence
 import cats.effect.IO
 import cats.implicits.*
 import doobie.Transactor
-import doobie.implicits.toSqlInterpolator
 import doobie.scalatest.*
 import org.flywaydb.core.Flyway
 import org.scalatest.BeforeAndAfterAll
@@ -45,6 +44,6 @@ class H2TodoRepositorySpec extends AnyFunSuite with Matchers with IOChecker with
 
   test("DeleteAll")(check(H2TodoRepository.Queries.deleteAll))
 
-  test("UpdateTodo")(check(H2TodoRepository.Queries.updateTodo(1, UpdateTodoCommand("test1".some, None, None))))
+  test("UpdateTodo")(check(H2TodoRepository.Queries.updateTodo(1, UpdateTodoCommand(None, None, true.some))))
 
 }

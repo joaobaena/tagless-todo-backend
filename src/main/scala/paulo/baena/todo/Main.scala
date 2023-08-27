@@ -3,7 +3,6 @@ package paulo.baena.todo
 import cats.effect.*
 import com.comcast.ip4s.*
 import org.http4s.ember.server.*
-import org.http4s.server.middleware.CORS
 import org.typelevel.log4cats.LoggerFactory
 import org.typelevel.log4cats.slf4j.Slf4jFactory
 import paulo.baena.todo.api.Routes
@@ -22,15 +21,12 @@ object Main extends IOApp {
         _                <- Resource.eval(database.startDatabaseAndMigrations)
         transactor       <- database.transactor
         repository        = H2TodoRepository[IO](transactor)
-        config           <- Resource.eval(
-                              CORS.policy
-                                .withAllowOriginAll(Routes.live(repository, httpServerConfig.url).orNotFound)
-                            )
+        service          <- Resource.eval(Routes.live(repository, httpServerConfig.url))
         server           <- EmberServerBuilder
                               .default[IO]
                               .withHost(ipv4"0.0.0.0")
                               .withPort(Port.fromInt(httpServerConfig.port).get)
-                              .withHttpApp(config)
+                              .withHttpApp(service.orNotFound)
                               .build
       } yield server
     serverResource

@@ -6,6 +6,8 @@ import io.circe.{Decoder, Encoder}
 import org.http4s.*
 import org.http4s.circe.*
 import org.http4s.dsl.Http4sDsl
+import org.http4s.server.middleware.{CORS, ErrorAction}
+import org.typelevel.log4cats.LoggerFactory
 import paulo.baena.todo.api.Messages.{CreateTodoRequest, UpdateTodoRequest}
 import paulo.baena.todo.persistence.TodoRepository
 
@@ -68,6 +70,16 @@ trait Routes[F[_]: Async] {
 }
 
 object Routes {
-  def live[F[_]: Async](todoRepository: TodoRepository[F], appUrl: String): HttpRoutes[F] =
-    new Routes[F] {}.httpRoutes(todoRepository)(appUrl)
+  def live[F[_]: Async](todoRepository: TodoRepository[F], appUrl: String)(implicit
+    loggerFactory: LoggerFactory[F]
+  ): F[HttpRoutes[F]] = {
+    val httpRoutes = new Routes[F] {}.httpRoutes(todoRepository)(appUrl)
+    val logger     = loggerFactory.getLogger
+    CORS.policy
+      .withAllowOriginAll(httpRoutes)
+      .map(service =>
+        ErrorAction
+          .httpRoutes[F](service, (_, thr) => logger.error("Error: " ++ thr.getMessage))
+      )
+  }
 }

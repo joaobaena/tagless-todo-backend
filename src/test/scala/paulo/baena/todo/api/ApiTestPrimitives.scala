@@ -1,11 +1,13 @@
 package paulo.baena.todo.api
 
 import cats.data.OptionT
-import cats.effect.{IO, Resource}
+import cats.effect.IO
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.auto.*
 import org.http4s.*
 import org.http4s.circe.*
+import org.typelevel.log4cats.LoggerFactory
+import org.typelevel.log4cats.slf4j.Slf4jFactory
 import paulo.baena.todo.api.Messages.{CreateTodoRequest, UpdateTodoRequest}
 import paulo.baena.todo.persistence.TestTodoRepository
 
@@ -14,9 +16,11 @@ object ApiTestPrimitives {
 
   val nonExistingId: Long = Long.MaxValue
 
-  // TODO: is it possible to pass IO[HttpRoutes[IO] and interpret it on the test suite?
-  val routes: HttpRoutes[IO] =
-    TestTodoRepository.inMemory[IO].map(Routes.live(_, "http://localhost")).unsafeRunSync()
+  implicit val loggerFactory: LoggerFactory[IO] = Slf4jFactory.create[IO]
+
+  private val testTodoRepository: TestTodoRepository[IO] = TestTodoRepository.inMemory[IO].unsafeRunSync()
+
+  val routes: HttpRoutes[IO] = Routes.live(testTodoRepository, "http://localhost").unsafeRunSync()
 
   implicit def circeJsonDecoder[A: Decoder]: EntityDecoder[IO, A] = jsonOf[IO, A]
 

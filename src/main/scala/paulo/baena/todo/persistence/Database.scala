@@ -1,11 +1,9 @@
 package paulo.baena.todo.persistence
 
 import cats.effect.*
-import cats.implicits.*
 import com.zaxxer.hikari.HikariConfig
 import doobie.*
 import doobie.hikari.HikariTransactor
-import doobie.implicits.toSqlInterpolator
 import org.flywaydb.core.Flyway
 import paulo.baena.todo.config.DatabaseConfig
 
