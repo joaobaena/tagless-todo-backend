@@ -1,6 +1,7 @@
 package paulo.baena.todo.api
 
 import cats.effect.IO
+import cats.implicits.*
 import org.http4s.*
 import io.circe.generic.auto.*
 import io.circe.Decoder
@@ -14,7 +15,7 @@ class RoutesSpec extends CatsEffectSuite {
   private val root = "/"
   
   test("POST: Creating a new TODO") {
-    val newTodo = CreateTodoRequest("New Todo", 0)
+    val newTodo = CreateTodoRequest("New Todo", 1.some)
 
     for {
       response <- postRequest(root, newTodo)
@@ -29,8 +30,8 @@ class RoutesSpec extends CatsEffectSuite {
   }
 
   test("GET: Getting all TODOs") {
-    val newTodo1 = CreateTodoRequest("Todo 1", 0)
-    val newTodo2 = CreateTodoRequest("Todo 2", 1)
+    val newTodo1 = CreateTodoRequest("Todo 1", None)
+    val newTodo2 = CreateTodoRequest("Todo 2", 1.some)
     for {
       _        <- deleteRequest(root)
       _        <- postRequest(root, newTodo1)
@@ -44,7 +45,7 @@ class RoutesSpec extends CatsEffectSuite {
   }
 
   test("PATCH: Updating that TODO") {
-    val newTodo    = CreateTodoRequest("New Todo", 0)
+    val newTodo    = CreateTodoRequest("New Todo", None)
     val updateTodo = UpdateTodoRequest(Some("Updated Title"), None, None)
 
     for {
@@ -73,8 +74,8 @@ class RoutesSpec extends CatsEffectSuite {
   }
 
   test("DELETE all TODOs") {
-    val newTodo1 = CreateTodoRequest("Todo 1", 0)
-    val newTodo2 = CreateTodoRequest("Todo 2", 1)
+    val newTodo1 = CreateTodoRequest("Todo 1", None)
+    val newTodo2 = CreateTodoRequest("Todo 2", 1.some)
 
     for {
       _              <- postRequest(root, newTodo1)

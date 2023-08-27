@@ -2,9 +2,8 @@ package paulo.baena.todo.persistence
 
 import cats.effect.*
 import cats.implicits.*
-import doobie.*
 import doobie.implicits.*
-import doobie.ConnectionIO
+import doobie.{ConnectionIO, _}
 import paulo.baena.todo.persistence.Representations.*
 
 final case class H2TodoRepository[F[_]](transactor: Transactor[F])(implicit F: Sync[F]) extends TodoRepository[F] {

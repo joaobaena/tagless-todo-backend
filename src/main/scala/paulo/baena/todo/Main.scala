@@ -4,11 +4,11 @@ import cats.effect.*
 import com.comcast.ip4s.*
 import org.http4s.ember.server.*
 import org.http4s.server.middleware.CORS
+import org.typelevel.log4cats.LoggerFactory
+import org.typelevel.log4cats.slf4j.Slf4jFactory
 import paulo.baena.todo.api.Routes
 import paulo.baena.todo.config.ApplicationConfig
 import paulo.baena.todo.persistence.*
-import org.typelevel.log4cats.LoggerFactory
-import org.typelevel.log4cats.slf4j.Slf4jFactory
 
 object Main extends IOApp {
   def run(args: List[String]): IO[ExitCode] = {
@@ -24,11 +24,11 @@ object Main extends IOApp {
         repository        = H2TodoRepository[IO](transactor)
         config           <- Resource.eval(
                               CORS.policy
-                                .withAllowOriginAll(Routes.live(repository).orNotFound)
+                                .withAllowOriginAll(Routes.live(repository, httpServerConfig.url).orNotFound)
                             )
         server           <- EmberServerBuilder
                               .default[IO]
-                              .withHost(Host.fromString(httpServerConfig.url).get)
+                              .withHost(ipv4"0.0.0.0")
                               .withPort(Port.fromInt(httpServerConfig.port).get)
                               .withHttpApp(config)
                               .build

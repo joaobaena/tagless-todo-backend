@@ -6,7 +6,7 @@ import io.scalaland.chimney.dsl.*
 import paulo.baena.todo.persistence.Representations.{CreateTodoCommand, UpdateTodoCommand}
 
 object Messages {
-  final case class CreateTodoRequest(title: String, order: Int) {
+  final case class CreateTodoRequest(title: String, order: Option[Int]) {
     lazy val asCreateTodoCommand = this.transformInto[CreateTodoCommand]
   }
 
@@ -22,7 +22,7 @@ object Messages {
     implicit val decoder: Decoder[UpdateTodoRequest] = deriveDecoder
   }
 
-  final case class TodoItemResponse(id: Long, title: String, order: Option[Int], completed: Boolean)
+  final case class TodoItemResponse(id: Long, title: String, order: Option[Int], completed: Boolean, url: String)
 
   object TodoItemResponse {
     implicit val encoder: Encoder[TodoItemResponse] = deriveEncoder

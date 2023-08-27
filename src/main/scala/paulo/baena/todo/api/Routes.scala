@@ -20,7 +20,7 @@ trait Routes[F[_]: Async] {
 
   }
 
-  def httpRoutes(todoRepository: TodoRepository[F]): HttpRoutes[F] = {
+  def httpRoutes(todoRepository: TodoRepository[F])(implicit appUrl: String): HttpRoutes[F] = {
     import CirceCodec._
 
     HttpRoutes.of[F] {
@@ -68,6 +68,6 @@ trait Routes[F[_]: Async] {
 }
 
 object Routes {
-  def live[F[_]: Async](todoRepository: TodoRepository[F]): HttpRoutes[F] =
-    new Routes[F] {}.httpRoutes(todoRepository)
+  def live[F[_]: Async](todoRepository: TodoRepository[F], appUrl: String): HttpRoutes[F] =
+    new Routes[F] {}.httpRoutes(todoRepository)(appUrl)
 }

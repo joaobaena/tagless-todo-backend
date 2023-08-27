@@ -16,7 +16,7 @@ object ApiTestPrimitives {
 
   // TODO: is it possible to pass IO[HttpRoutes[IO] and interpret it on the test suite?
   val routes: HttpRoutes[IO] =
-    TestTodoRepository.inMemory[IO].map(Routes.live(_)).unsafeRunSync()
+    TestTodoRepository.inMemory[IO].map(Routes.live(_, "http://localhost")).unsafeRunSync()
 
   implicit def circeJsonDecoder[A: Decoder]: EntityDecoder[IO, A] = jsonOf[IO, A]
 
