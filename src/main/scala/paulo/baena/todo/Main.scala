@@ -21,7 +21,7 @@ object Main extends IOApp {
         database          = Database[IO](databaseConfig)
         _                <- Resource.eval(database.startDatabaseAndMigrations)
         transactor       <- database.transactor
-        repository        = InMemoryTodoRepository[IO](transactor)
+        repository        = H2TodoRepository[IO](transactor)
         config           <- Resource.eval(
                               CORS.policy
                                 .withAllowOriginAll(Routes.live(repository).orNotFound)

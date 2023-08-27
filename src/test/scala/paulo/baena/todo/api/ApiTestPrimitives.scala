@@ -20,7 +20,7 @@ object ApiTestPrimitives {
 
   implicit def circeJsonDecoder[A: Decoder]: EntityDecoder[IO, A] = jsonOf[IO, A]
 
-  implicit def circeJsonEncoder[A: Encoder]: EntityEncoder[IO, A] = jsonEncoderOf[IO, A]
+  implicit def circeJsonEncoder[A: Encoder]: EntityEncoder[IO, A] = jsonEncoderOf[A]
 
   def postRequest(uri: String, createTodoRequest: CreateTodoRequest): IO[Response[IO]] =
     getResponse(routes.run(Request[IO](Method.POST, Uri.unsafeFromString(uri)).withEntity(createTodoRequest)))

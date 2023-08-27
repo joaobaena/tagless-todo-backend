@@ -41,13 +41,3 @@ object Database {
   }
 
 }
-
-object DatabaseHealthCheck {
-  def healthCheck[F[_]: Sync](transactor: Transactor[F]): F[Boolean] = {
-    val query = sql"SELECT 1".query[Int].unique
-    transactor.trans.apply(query).attempt.map {
-      case Right(_) => true
-      case Left(_)  => false
-    }
-  }
-}

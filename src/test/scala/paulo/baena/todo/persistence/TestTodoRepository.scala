@@ -39,7 +39,7 @@ final case class TestTodoRepository[F[_]: Async](
       originalTodo
         .copy(
           title = updateTodo.title.getOrElse(originalTodo.title),
-          itemOrder = updateTodo.order.getOrElse(originalTodo.itemOrder),
+          itemOrder = updateTodo.order.fold(originalTodo.itemOrder)(_.some),
           completed = updateTodo.completed.getOrElse(originalTodo.completed),
           updatedAt = now
         )
@@ -64,7 +64,7 @@ final case class TestTodoRepository[F[_]: Async](
 object TestTodoRepository {
   def inMemory[F[_]: Async]: F[TestTodoRepository[F]] =
     for {
-      ref <- Ref.of[F, Map[Long, TodoItem]](Map.empty)
+      ref       <- Ref.of[F, Map[Long, TodoItem]](Map.empty)
       idCounter <- Ref.of[F, Long](1L)
     } yield TestTodoRepository(Clock[F], ref, idCounter)
 }

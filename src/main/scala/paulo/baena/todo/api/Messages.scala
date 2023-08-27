@@ -22,7 +22,7 @@ object Messages {
     implicit val decoder: Decoder[UpdateTodoRequest] = deriveDecoder
   }
 
-  final case class TodoItemResponse(id: Long, title: String, order: Int, completed: Boolean)
+  final case class TodoItemResponse(id: Long, title: String, order: Option[Int], completed: Boolean)
 
   object TodoItemResponse {
     implicit val encoder: Encoder[TodoItemResponse] = deriveEncoder

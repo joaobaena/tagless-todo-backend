@@ -8,14 +8,7 @@ import paulo.baena.todo.api.Messages.TodoItemResponse
 import java.time.OffsetDateTime
 
 object Representations {
-  final case class TodoItem(
-    id: Long,
-    title: String,
-    itemOrder: Int,
-    completed: Boolean,
-    updatedAt: OffsetDateTime,
-    createdAt: OffsetDateTime
-  ) {
+  final case class TodoItem(id: Long, title: String, itemOrder: Option[Int], completed: Boolean, updatedAt: OffsetDateTime, createdAt: OffsetDateTime) {
     lazy val asTodoItemResponse = this
       .into[TodoItemResponse]
       .withFieldRenamed(_.itemOrder, _.order)
@@ -28,12 +21,12 @@ object Representations {
       java.sql.Timestamp.from(odt.toInstant)
     )
 
-  implicit val todoItemRead: Read[TodoItem] = Read[(Long, String, Int, Boolean, OffsetDateTime, OffsetDateTime)].map {
+  implicit val todoItemRead: Read[TodoItem] = Read[(Long, String, Option[Int], Boolean, OffsetDateTime, OffsetDateTime)].map {
     case (id, title, order, completed, updatedAt, createdAt) =>
       TodoItem(id, title, order, completed, updatedAt, createdAt)
   }
 
-  final case class CreateTodoCommand(title: String, order: Int)
+  final case class CreateTodoCommand(title: String, order: Option[Int])
 
   final case class UpdateTodoCommand(title: Option[String], order: Option[Int], completed: Option[Boolean])
 

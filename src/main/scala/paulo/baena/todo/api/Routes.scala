@@ -24,29 +24,27 @@ trait Routes[F[_]: Async] {
     import CirceCodec._
 
     HttpRoutes.of[F] {
-      case GET -> Root / "todos" =>
+      case GET -> Root =>
         for {
-          _                <- Async[F].pure(println(s"test"))
           todoItems        <- todoRepository.getAll
-          _                <- Async[F].pure(println(s"todoItems: $todoItems"))
           todoItemsResponse = todoItems.map(_.asTodoItemResponse)
           response         <- Ok(todoItemsResponse)
         } yield response
 
-      case GET -> Root / "todos" / LongVar(todoId) =>
+      case GET -> Root / LongVar(todoId) =>
         for {
           maybeTodoItem <- todoRepository.getTodoById(todoId)
           response      <- maybeTodoItem.fold(NotFound(s"Id $todoId not found"))(todoItem => Ok(todoItem.asTodoItemResponse))
         } yield response
 
-      case request @ POST -> Root / "todos" =>
+      case request @ POST -> Root =>
         for {
           createTodoRequest <- request.as[CreateTodoRequest]
-          createdTodoItem    <- todoRepository.createTodo(createTodoRequest.asCreateTodoCommand)
-          response           <- Created(createdTodoItem.asTodoItemResponse)
+          createdTodoItem   <- todoRepository.createTodo(createTodoRequest.asCreateTodoCommand)
+          response          <- Created(createdTodoItem.asTodoItemResponse)
         } yield response
 
-      case request @ PATCH -> Root / "todos" / LongVar(todoId) =>
+      case request @ PATCH -> Root / LongVar(todoId) =>
         for {
           updateTodoRequest <- request.as[UpdateTodoRequest]
           maybeTodoItem     <- todoRepository.updateTodo(todoId, updateTodoRequest.asUpdateTodoCommand)
@@ -54,13 +52,13 @@ trait Routes[F[_]: Async] {
             maybeTodoItem.fold(NotFound(s"Id $todoId not found"))(todoItem => Ok(todoItem.asTodoItemResponse))
         } yield response
 
-      case DELETE -> Root / "todos" =>
+      case DELETE -> Root =>
         for {
           _        <- todoRepository.deleteAll
           response <- Ok("Deleted")
         } yield response
 
-      case DELETE -> Root / "todos" / LongVar(todoId) =>
+      case DELETE -> Root / LongVar(todoId) =>
         for {
           maybeDeleted <- todoRepository.deleteTodoById(todoId)
           response     <- maybeDeleted.fold(NotFound(s"Id $todoId not found"))(_ => Ok("Deleted"))
