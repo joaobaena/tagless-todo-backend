@@ -7,7 +7,7 @@ import paulo.baena.todo.persistence.Representations.*
 
 import java.time.{Instant, OffsetDateTime, ZoneOffset}
 
-final case class TestTodoRepository[F[_]: Async](
+final case class TestTodoRepository[F[_]: Sync](
   clock: Clock[F],
   ref: Ref[F, Map[Long, TodoItem]],
   idCounter: Ref[F, Long]
@@ -62,7 +62,7 @@ final case class TestTodoRepository[F[_]: Async](
 }
 
 object TestTodoRepository {
-  def inMemory[F[_]: Async]: F[TestTodoRepository[F]] =
+  def inMemory[F[_]: Sync]: F[TestTodoRepository[F]] =
     for {
       ref       <- Ref.of[F, Map[Long, TodoItem]](Map.empty)
       idCounter <- Ref.of[F, Long](1L)

@@ -11,7 +11,7 @@ import org.scalatest.matchers.must.Matchers
 import paulo.baena.todo.config.DatabaseConfig
 import paulo.baena.todo.persistence.Representations.{CreateTodoCommand, UpdateTodoCommand}
 
-class H2TodoRepositorySpec extends AnyFunSuite with Matchers with IOChecker with BeforeAndAfterAll {
+class H2TodoRepositoryQueriesSpec extends AnyFunSuite with Matchers with IOChecker with BeforeAndAfterAll {
   private val databaseConfig = DatabaseConfig(
     url = "jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1",
     user = "user",
@@ -42,7 +42,7 @@ class H2TodoRepositorySpec extends AnyFunSuite with Matchers with IOChecker with
 
   test("DeleteTodoById")(check(H2TodoRepository.Queries.deleteTodoById(1)))
 
-  test("DeleteAll")(check(H2TodoRepository.Queries.deleteAll))
+  test("DeleteAll")(check(H2TodoRepository.Queries.deleteAll()))
 
   test("UpdateTodo")(check(H2TodoRepository.Queries.updateTodo(1, UpdateTodoCommand(None, None, true.some))))
 

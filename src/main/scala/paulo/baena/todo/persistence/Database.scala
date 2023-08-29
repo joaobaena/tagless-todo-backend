@@ -23,7 +23,6 @@ object Database {
                           buildConfig.setJdbcUrl(databaseConfig.url)
                           buildConfig.setUsername(databaseConfig.user)
                           buildConfig.setPassword(databaseConfig.password)
-                          buildConfig.setLeakDetectionThreshold(10000)
                           buildConfig
                         }
         xa           <- HikariTransactor.fromHikariConfig[F](hikariConfig)

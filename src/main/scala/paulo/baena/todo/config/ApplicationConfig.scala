@@ -18,3 +18,7 @@ object ApplicationConfig {
 
   def configLoader[F[_]: Sync] = new ApplicationConfigLoader[F]
 }
+
+final case class DatabaseConfig(url: String, user: String, password: String, driver: String)
+
+final case class HttpServerConfig(url: String, port: Int)
