@@ -16,10 +16,10 @@ object Representations {
     updatedAt: OffsetDateTime,
     createdAt: OffsetDateTime
   ) {
-    def asTodoItemResponse(implicit appUrl: String) = this
+    def asTodoItemResponse(baseUrl: String) = this
       .into[TodoItemResponse]
       .withFieldRenamed(_.itemOrder, _.order)
-      .withFieldComputed(_.url, todoItem => s"$appUrl/${todoItem.id}")
+      .withFieldComputed(_.url, todoItem => s"$baseUrl/${todoItem.id}")
       .transform
   }
 

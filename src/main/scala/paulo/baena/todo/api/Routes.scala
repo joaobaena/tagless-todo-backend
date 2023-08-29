@@ -13,26 +13,27 @@ trait Routes[F[_]: Async] extends CirceCodec[F] {
   private val dsl: Http4sDsl[F] = Http4sDsl[F]
   import dsl._
 
-  def httpRoutes(todoRepository: TodoRepository[F])(implicit appUrl: String): HttpRoutes[F] =
+  def httpRoutes(todoRepository: TodoRepository[F], baseUrl: String): HttpRoutes[F] =
     HttpRoutes.of[F] {
       case GET -> Root / basePath =>
         for {
           todoItems        <- todoRepository.getAll
-          todoItemsResponse = todoItems.map(_.asTodoItemResponse)
+          todoItemsResponse = todoItems.map(_.asTodoItemResponse(baseUrl))
           response         <- Ok(todoItemsResponse)
         } yield response
 
       case GET -> Root / basePath / LongVar(todoId) =>
         for {
           maybeTodoItem <- todoRepository.getTodoById(todoId)
-          response      <- maybeTodoItem.fold(NotFound(s"Id $todoId not found"))(todoItem => Ok(todoItem.asTodoItemResponse))
+          response      <-
+            maybeTodoItem.fold(NotFound(s"Id $todoId not found"))(todoItem => Ok(todoItem.asTodoItemResponse(baseUrl)))
         } yield response
 
       case request @ POST -> Root / basePath =>
         for {
           createTodoRequest <- request.as[CreateTodoRequest]
           createdTodoItem   <- todoRepository.createTodo(createTodoRequest.asCreateTodoCommand)
-          response          <- Created(createdTodoItem.asTodoItemResponse)
+          response          <- Created(createdTodoItem.asTodoItemResponse(baseUrl))
         } yield response
 
       case request @ PATCH -> Root / basePath / LongVar(todoId) =>
@@ -40,7 +41,7 @@ trait Routes[F[_]: Async] extends CirceCodec[F] {
           updateTodoRequest <- request.as[UpdateTodoRequest]
           maybeTodoItem     <- todoRepository.updateTodo(todoId, updateTodoRequest.asUpdateTodoCommand)
           response          <-
-            maybeTodoItem.fold(NotFound(s"Id $todoId not found"))(todoItem => Ok(todoItem.asTodoItemResponse))
+            maybeTodoItem.fold(NotFound(s"Id $todoId not found"))(todoItem => Ok(todoItem.asTodoItemResponse(baseUrl)))
         } yield response
 
       case DELETE -> Root / basePath =>
@@ -58,10 +59,10 @@ trait Routes[F[_]: Async] extends CirceCodec[F] {
 }
 
 object Routes {
-  def live[F[_]: Async](todoRepository: TodoRepository[F], appUrl: String)(implicit
+  def live[F[_]: Async](todoRepository: TodoRepository[F], serverUrl: String)(implicit
     loggerFactory: LoggerFactory[F]
   ): F[HttpRoutes[F]] = {
-    val httpRoutes = new Routes[F] {}.httpRoutes(todoRepository)(appUrl)
+    val httpRoutes = new Routes[F] {}.httpRoutes(todoRepository, s"$serverUrl/$basePath")
     val logger     = loggerFactory.getLogger
     CORS.policy
       .withAllowOriginAll(httpRoutes)
