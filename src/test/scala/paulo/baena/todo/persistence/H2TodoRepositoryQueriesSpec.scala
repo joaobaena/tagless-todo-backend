@@ -34,7 +34,6 @@ class H2TodoRepositoryQueriesSpec extends AnyFunSuite with Matchers with IOCheck
       .load()
       .migrate()
 
-  // TODO: Can we easily make this a property check?
   test("CreateTodo")(check(H2TodoRepository.Queries.createTodo(CreateTodoCommand("test", 1.some))))
 
   test("GetTodoById")(check(H2TodoRepository.Queries.getTodoById(1)))
