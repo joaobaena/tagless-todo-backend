@@ -15,7 +15,8 @@ trait Routes[F[_]: Async] {
   private val dsl: Http4sDsl[F] = Http4sDsl[F]
   import dsl._
 
-  object CirceCodec {
+  // TODO: move to own class so it doesn't polute the routes
+  private object CirceCodec {
     implicit def circeJsonDecoder[A: Decoder]: EntityDecoder[F, A] = jsonOf[F, A]
 
     implicit def circeJsonEncoder[A: Encoder]: EntityEncoder[F, A] = jsonEncoderOf[A]
@@ -26,27 +27,27 @@ trait Routes[F[_]: Async] {
     import CirceCodec._
 
     HttpRoutes.of[F] {
-      case GET -> Root =>
+      case GET -> Root / basePath =>
         for {
           todoItems        <- todoRepository.getAll
           todoItemsResponse = todoItems.map(_.asTodoItemResponse)
           response         <- Ok(todoItemsResponse)
         } yield response
 
-      case GET -> Root / LongVar(todoId) =>
+      case GET -> Root / basePath / LongVar(todoId) =>
         for {
           maybeTodoItem <- todoRepository.getTodoById(todoId)
           response      <- maybeTodoItem.fold(NotFound(s"Id $todoId not found"))(todoItem => Ok(todoItem.asTodoItemResponse))
         } yield response
 
-      case request @ POST -> Root =>
+      case request @ POST -> Root / basePath =>
         for {
           createTodoRequest <- request.as[CreateTodoRequest]
           createdTodoItem   <- todoRepository.createTodo(createTodoRequest.asCreateTodoCommand)
           response          <- Created(createdTodoItem.asTodoItemResponse)
         } yield response
 
-      case request @ PATCH -> Root / LongVar(todoId) =>
+      case request @ PATCH -> Root / basePath / LongVar(todoId) =>
         for {
           updateTodoRequest <- request.as[UpdateTodoRequest]
           maybeTodoItem     <- todoRepository.updateTodo(todoId, updateTodoRequest.asUpdateTodoCommand)
@@ -54,13 +55,13 @@ trait Routes[F[_]: Async] {
             maybeTodoItem.fold(NotFound(s"Id $todoId not found"))(todoItem => Ok(todoItem.asTodoItemResponse))
         } yield response
 
-      case DELETE -> Root =>
+      case DELETE -> Root / basePath =>
         for {
           _        <- todoRepository.deleteAll
           response <- Ok("Deleted")
         } yield response
 
-      case DELETE -> Root / LongVar(todoId) =>
+      case DELETE -> Root / basePath / LongVar(todoId) =>
         for {
           maybeDeleted <- todoRepository.deleteTodoById(todoId)
           response     <- maybeDeleted.fold(NotFound(s"Id $todoId not found"))(_ => Ok("Deleted"))
@@ -75,11 +76,14 @@ object Routes {
   ): F[HttpRoutes[F]] = {
     val httpRoutes = new Routes[F] {}.httpRoutes(todoRepository)(appUrl)
     val logger     = loggerFactory.getLogger
+    // TODO: can the cors policy be update so it only allows CORS from todobackend.com?
     CORS.policy
       .withAllowOriginAll(httpRoutes)
       .map(service =>
+        // TODO: also it would be good to have a handler that mapped error messages into the 500 response
         ErrorAction
           .httpRoutes[F](service, (_, thr) => logger.error("Error: " ++ thr.getMessage))
       )
   }
+  val basePath = "todos"
 }

@@ -23,7 +23,7 @@ lazy val root = (project in file("."))
       "-deprecation",
       "-feature",
       "-unchecked",
-      "-Wunused:imports" // Emit warning for unused imports.
+      "-Wunused:imports"
     ),
     libraryDependencies ++= Seq(
       "com.h2database"              % "h2"                  % h2Version,
@@ -45,8 +45,8 @@ lazy val root = (project in file("."))
       "org.tpolecat"               %% "doobie-core"         % doobieVersion,
       "org.tpolecat"               %% "doobie-h2"           % doobieVersion,
       "org.tpolecat"               %% "doobie-hikari"       % doobieVersion,
-      "org.tpolecat"               %% "doobie-scalatest"    % doobieVersion     % Test,
-      "org.typelevel"              %% "munit-cats-effect-3" % munitVersion      % Test
+      "org.tpolecat"               %% "doobie-scalatest"    % doobieVersion % Test,
+      "org.typelevel"              %% "munit-cats-effect-3" % munitVersion  % Test
     )
   )
 

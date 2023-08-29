@@ -16,6 +16,7 @@ object Representations {
     updatedAt: OffsetDateTime,
     createdAt: OffsetDateTime
   ) {
+    // TODO: should this be an implicit, also maybe should be a URL instead of string
     def asTodoItemResponse(implicit appUrl: String) = this
       .into[TodoItemResponse]
       .withFieldRenamed(_.itemOrder, _.order)
@@ -34,6 +35,7 @@ object Representations {
         TodoItem(id, title, order, completed, updatedAt, createdAt)
     }
 
+  // TODO: Does it make sense to call Command?
   final case class CreateTodoCommand(title: String, order: Option[Int])
 
   final case class UpdateTodoCommand(title: Option[String], order: Option[Int], completed: Option[Boolean])

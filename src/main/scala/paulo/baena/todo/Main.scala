@@ -17,6 +17,7 @@ object Main extends IOApp {
       for {
         databaseConfig   <- Resource.eval(configLoader.loadDatabaseConfig)
         httpServerConfig <- Resource.eval(configLoader.loadHttpServerConfig)
+        port             <- buildPort(httpServerConfig.port)
         database          = Database[IO](databaseConfig)
         _                <- Resource.eval(database.startDatabaseAndMigrations)
         transactor       <- database.transactor
@@ -25,7 +26,7 @@ object Main extends IOApp {
         server           <- EmberServerBuilder
                               .default[IO]
                               .withHost(ipv4"0.0.0.0")
-                              .withPort(Port.fromInt(httpServerConfig.port).get)
+                              .withPort(port)
                               .withHttpApp(service.orNotFound)
                               .build
       } yield server
@@ -33,4 +34,11 @@ object Main extends IOApp {
       .use(_ => IO.never)
       .as(ExitCode.Success)
   }
+
+  private def buildPort(port: Int): Resource[IO, Port] =
+    Resource.eval(
+      Port
+        .fromInt(port)
+        .fold(IO.raiseError(new IllegalArgumentException(s"Port $port is incorrect")))(IO.pure(_))
+    )
 }

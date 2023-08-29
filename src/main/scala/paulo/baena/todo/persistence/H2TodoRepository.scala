@@ -34,12 +34,15 @@ final case class H2TodoRepository[F[_]](transactor: Transactor[F])(implicit F: S
       .run
       .transact(transactor)
       .map {
-        case 0 => None
+        case 0 => none
         case _ => ().some
       }
 
   def deleteAll: F[Unit] =
-    Queries.deleteAll.run.void
+    Queries
+      .deleteAll()
+      .run
+      .void
       .transact(transactor)
 
   def updateTodo(todoId: Long, updateTodo: UpdateTodoCommand): F[Option[TodoItem]] =
@@ -91,7 +94,7 @@ object H2TodoRepository {
         WHERE id = $todoId
       """.update
 
-    def deleteAll: Update0 =
+    def deleteAll(): Update0 =
       sql"""
         DELETE FROM todos
       """.update

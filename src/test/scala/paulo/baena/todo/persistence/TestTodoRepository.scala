@@ -62,6 +62,7 @@ final case class TestTodoRepository[F[_]: Async](
 }
 
 object TestTodoRepository {
+  // TODO: This should be sync
   def inMemory[F[_]: Async]: F[TestTodoRepository[F]] =
     for {
       ref       <- Ref.of[F, Map[Long, TodoItem]](Map.empty)

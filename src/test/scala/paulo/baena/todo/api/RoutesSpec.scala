@@ -12,20 +12,25 @@ class RoutesSpec extends CatsEffectSuite {
 
   import ApiTestPrimitives._
 
-  private val root = "/"
-  
-  test("POST: Creating a new TODO") {
+  private val basePath = s"/${Routes.basePath}"
+
+  test("POST: Creating and getting a TODO") {
     val newTodo = CreateTodoRequest("New Todo", 1.some)
 
     for {
-      response <- postRequest(root, newTodo)
-      _        <- response.as[TodoItemResponse]
-    } yield assertEquals(response.status, Status.Created)
+      response           <- postRequest(basePath, newTodo)
+      todoItemResponse   <- response.as[TodoItemResponse]
+      getResponse        <- getRequest(s"$basePath/${todoItemResponse.id}")
+      storedItemResponse <- getResponse.as[TodoItemResponse]
+    } yield {
+      assertEquals(response.status, Status.Created)
+      assertEquals(todoItemResponse, storedItemResponse)
+    }
   }
 
   test("GET: Trying to get a TODO that doesn't exist") {
     for {
-      response <- getRequest(s"/$nonExistingId")
+      response <- getRequest(s"$basePath/$nonExistingId")
     } yield assertEquals(response.status, Status.NotFound)
   }
 
@@ -33,10 +38,10 @@ class RoutesSpec extends CatsEffectSuite {
     val newTodo1 = CreateTodoRequest("Todo 1", None)
     val newTodo2 = CreateTodoRequest("Todo 2", 1.some)
     for {
-      _        <- deleteRequest(root)
-      _        <- postRequest(root, newTodo1)
-      _        <- postRequest(root, newTodo2)
-      response <- getRequest(root)
+      _        <- deleteRequest(basePath)
+      _        <- postRequest(basePath, newTodo1)
+      _        <- postRequest(basePath, newTodo2)
+      response <- getRequest(basePath)
       todos    <- response.as[List[TodoItemResponse]]
     } yield {
       assertEquals(response.status, Status.Ok)
@@ -44,14 +49,14 @@ class RoutesSpec extends CatsEffectSuite {
     }
   }
 
-  test("PATCH: Updating that TODO") {
+  test("PATCH: Updating a TODO") {
     val newTodo    = CreateTodoRequest("New Todo", None)
     val updateTodo = UpdateTodoRequest(Some("Updated Title"), None, None)
 
     for {
-      postResponse  <- postRequest(root, newTodo)
+      postResponse  <- postRequest(basePath, newTodo)
       createdTodo   <- postResponse.as[TodoItemResponse]
-      patchResponse <- patchRequest(s"/${createdTodo.id}", updateTodo)
+      patchResponse <- patchRequest(s"$basePath/${createdTodo.id}", updateTodo)
       updatedTodo   <- patchResponse.as[TodoItemResponse]
     } yield {
       assertEquals(patchResponse.status, Status.Ok)
@@ -60,28 +65,28 @@ class RoutesSpec extends CatsEffectSuite {
   }
 
   test("PATCH: Trying to update a TODO that doesn't exist") {
-    val updateTodo    = UpdateTodoRequest(Some("Updated Title"), None, None)
+    val updateTodo = UpdateTodoRequest(Some("Updated Title"), None, None)
 
     for {
-      response <- patchRequest(s"/${nonExistingId}", updateTodo)
+      response <- patchRequest(s"$basePath/${nonExistingId}", updateTodo)
     } yield assertEquals(response.status, Status.NotFound)
   }
 
   test("DELETE: Trying to delete a non-existing TODO") {
     for {
-      response <- deleteRequest(s"/$nonExistingId")
+      response <- deleteRequest(s"$basePath/$nonExistingId")
     } yield assertEquals(response.status, Status.NotFound)
   }
 
-  test("DELETE all TODOs") {
+  test("DELETE: all TODOs") {
     val newTodo1 = CreateTodoRequest("Todo 1", None)
     val newTodo2 = CreateTodoRequest("Todo 2", 1.some)
 
     for {
-      _              <- postRequest(root, newTodo1)
-      _              <- postRequest(root, newTodo2)
-      deleteResponse <- deleteRequest(root)
-      getAllResponse <- getRequest(root)
+      _              <- postRequest(basePath, newTodo1)
+      _              <- postRequest(basePath, newTodo2)
+      deleteResponse <- deleteRequest(basePath)
+      getAllResponse <- getRequest(basePath)
       todos          <- getAllResponse.as[List[TodoItemResponse]]
     } yield {
       assertEquals(deleteResponse.status, Status.Ok)
